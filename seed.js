@@ -1,8 +1,8 @@
+require('dotenv').config()
 const { db } = require('@vercel/postgres');
 const {
   gfms
-} = require('../app/lib/placeholder-data.js');
-const bcrypt = require('bcrypt');
+} = require('./placeholder-data.js');
 
 async function seedGfms(client) {
   try {
@@ -20,22 +20,20 @@ async function seedGfms(client) {
     console.log(`Created "gfms" table`);
 
     // Insert data into the "users" table
-    const insertedUsers = await Promise.all(
-      users.map(async (user) => {
-        const hashedPassword = await bcrypt.hash(user.password, 10);
+    const insertedGfms = await Promise.all(
+      gfms.map(async (gfm) => {
         return client.sql`
-        INSERT INTO users (id, name, email, password)
-        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
-        ON CONFLICT (id) DO NOTHING;
+        INSERT INTO gfms (url, imageurl, title)
+        VALUES (${gfm.url}, ${gfm.imageurl}, ${gfm.title});
       `;
       }),
     );
 
-    console.log(`Seeded ${insertedUsers.length} users`);
+    console.log(`Seeded ${insertedGfms.length} users`);
 
     return {
       createTable,
-      users: insertedUsers,
+      gfms: insertedGfms,
     };
   } catch (error) {
     console.error('Error seeding users:', error);
