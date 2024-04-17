@@ -9,7 +9,8 @@ async function seedGfms(client) {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
     // Create the "users" table if it doesn't exist
     const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS gfms (
+        DROP TABLE IF EXISTS gfms;
+        CREATE TABLE IF NOT EXISTS gfms (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         url TEXT NOT NULL UNIQUE,
         imageurl TEXT UNIQUE,
