@@ -1,10 +1,7 @@
 require('dotenv').config()
 const { db } = require('@vercel/postgres');
-const {
-  gfms
-} = require('./placeholder-data.js');
 
-async function seedGfms(client) {
+async function buildGfmTable(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
     // Create the "users" table if it doesn't exist
@@ -14,30 +11,18 @@ async function seedGfms(client) {
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         url TEXT NOT NULL UNIQUE,
         imageurl TEXT UNIQUE,
-        title TEXT
+        title TEXT,
+        progress TEXT
       );
     `;
 
     console.log(`Created "gfms" table`);
 
-    // Insert data into the "users" table
-    const insertedGfms = await Promise.all(
-      gfms.map(async (gfm) => {
-        return client.sql`
-        INSERT INTO gfms (url, imageurl, title)
-        VALUES (${gfm.url}, ${gfm.imageurl}, ${gfm.title});
-      `;
-      }),
-    );
-
-    console.log(`Seeded ${insertedGfms.length} users`);
-
     return {
       createTable,
-      gfms: insertedGfms,
     };
   } catch (error) {
-    console.error('Error seeding users:', error);
+    console.error('Error building table:', error);
     throw error;
   }
 }
@@ -45,7 +30,7 @@ async function seedGfms(client) {
 async function main() {
   const client = await db.connect();
 
-  await seedGfms(client);
+  await buildGfmTable(client);
 
   await client.end();
 }
